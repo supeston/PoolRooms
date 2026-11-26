@@ -1,0 +1,21 @@
+{
+  "name": "poolrooms-dark-water-nightmare",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "postprocessing": "^6.36.6",
+    "three": "~0.170.0"
+  },
+  "devDependencies": {
+    "@types/three": "~0.170.0",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.5"
+  }
+}

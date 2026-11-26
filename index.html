@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>POOLROOMS // FIVE-STAGE LIMINAL ARCHIVE</title>
+    <style>
+      html,
+      body,
+      #app {
+        margin: 0;
+        padding: 0;
+        width: 100dvw;
+        height: 100dvh;
+        overflow: hidden;
+        background: #020507;
+        color: #dbe8ec;
+        font-family: ui-monospace, 'Cascadia Mono', 'SFMono-Regular', Menlo, Consolas, monospace;
+      }
+      #scene-canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+        background: #020507;
+      }
+      .hidden {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+      .loader-screen {
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+        display: grid;
+        place-items: center;
+        background: #020507;
+        transition: opacity 0.55s ease, visibility 0.55s ease;
+      }
+      .loader-screen.done {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+      .loader-inner {
+        width: min(380px, 86dvw);
+        text-align: center;
+      }
+      .loader-header {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        margin-bottom: 0.9rem;
+      }
+      .loader-title {
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        font-weight: 300;
+        font-size: 1.05rem;
+        letter-spacing: 0.36em;
+        color: rgba(226, 240, 244, 0.9);
+      }
+      .loader-pct {
+        font-size: 0.78rem;
+        letter-spacing: 0.14em;
+        color: rgba(182, 234, 244, 0.92);
+        font-variant-numeric: tabular-nums;
+      }
+      .loader-track {
+        width: 100%;
+        height: 3px;
+        background: rgba(160, 210, 222, 0.14);
+        border-radius: 2px;
+        overflow: hidden;
+      }
+      .loader-fill {
+        width: 0%;
+        height: 100%;
+        background: rgba(178, 232, 242, 0.9);
+        transition: width 0.12s linear;
+      }
+      .loader-status {
+        margin-top: 0.8rem;
+        font-size: 0.62rem;
+        letter-spacing: 0.2em;
+        color: rgba(150, 194, 204, 0.64);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="scene-canvas"></canvas>
+
+      <div id="loader" class="loader-screen" aria-live="polite">
+        <div class="loader-inner">
+          <div class="loader-header">
+            <div class="loader-title">POOLROOMS</div>
+            <div id="loader-pct" class="loader-pct">0%</div>
+          </div>
+          <div class="loader-track">
+            <div id="loader-fill" class="loader-fill"></div>
+          </div>
+          <div id="loader-status" class="loader-status">INITIALIZING ARCHIVE...</div>
+        </div>
+      </div>
+
+      <div id="cam-hud" class="cam-hud hidden" aria-hidden="true">
+        <div class="cam-row">
+          <span class="rec-dot"></span>
+          <span class="cam-label">REC // AXON-W7 · 4K HDR</span>
+        </div>
+        <div class="cam-row cam-meta">
+          <span id="cam-zone">STAGE 01 · GLASS-BLOCK NATATORIUM</span>
+          <span id="cam-time">00:00:00</span>
+        </div>
+      </div>
+
+      <div id="chapter-banner" class="chapter-banner hidden" aria-hidden="true">
+        <p id="chapter-code" class="chapter-code">STAGE 01</p>
+        <h2 id="chapter-title" class="chapter-title">GLASS-BLOCK HALLS</h2>
+        <p id="chapter-sub" class="chapter-sub">LIMINAL THRESHOLD // DIFFUSED NATATORIUM</p>
+      </div>
+
+      <div id="transition-veil" class="transition-veil hidden" aria-hidden="true">
+        <div class="loader-inner">
+          <div class="loader-header">
+            <div id="transition-stage-label" class="loader-title">LOADING STAGE</div>
+            <div id="transition-pct" class="loader-pct">0%</div>
+          </div>
+          <div class="loader-track">
+            <div id="transition-fill" class="loader-fill"></div>
+          </div>
+          <div id="transition-status" class="loader-status">PREPARING ARCHITECTURE...</div>
+        </div>
+      </div>
+
+      <div id="ladder-hint" class="ladder-hint hidden" aria-hidden="true">
+        <span>W / SPACE</span> Climb Ladder · <span>S / C</span> Descend
+      </div>
+
+      <div id="finale-card" class="finale-card hidden" aria-hidden="true">
+        <p class="eyebrow">FIVE-STAGE LIMINAL ARCHIVE // COMPLETE</p>
+        <h2 class="finale-title">ZENITH THRESHOLD REACHED</h2>
+        <p class="finale-sub">Press R to return to Stage 01 — Glass-Block Halls.</p>
+      </div>
+
+      <div id="hint-bar" class="hint-bar hidden" aria-hidden="true">
+        <span>WASD</span> Move
+        <span class="sep">·</span>
+        <span>SHIFT</span> Sprint / Swim
+        <span class="sep">·</span>
+        <span>SPACE</span> Jump / Climb
+        <span class="sep">·</span>
+        <span>C</span> Dive
+        <span class="sep">·</span>
+        <span>F</span> Flashlight
+        <span class="sep">·</span>
+        <span>[ / ]</span> Prev / Next Stage
+      </div>
+
+      <div id="overlay" class="overlay hidden">
+        <div class="glass-card" id="glass-card">
+          <p class="eyebrow">FOUND FOOTAGE // FIVE-STAGE LIMINAL ARCHIVE</p>
+          <h1 class="title">POOLROOMS</h1>
+          <p class="subtitle">MONUMENTAL ARCHITECTURAL LIMINALITY</p>
+
+          <button id="enter-btn" class="enter-btn" type="button">
+            [ CLICK TO ENTER ]
+          </button>
+
+          <div class="archive-section">
+            <p class="archive-heading">FIVE-STAGE ARCHIVE (SELECT STAGE OR EXPLORE CONTINUOUSLY)</p>
+            <div id="level-grid" class="level-grid" role="group" aria-label="Select Archive Stage"></div>
+          </div>
+
+          <div class="keybinds">
+            <div><kbd>WASD</kbd><span>Move</span></div>
+            <div><kbd>SHIFT</kbd><span>Sprint / Swim</span></div>
+            <div><kbd>SPACE</kbd><span>Jump / Mantle / Climb</span></div>
+            <div><kbd>C</kbd><span>Dive</span></div>
+            <div><kbd>F</kbd><span>Flashlight</span></div>
+            <div><kbd>[</kbd><kbd>]</kbd><span>Switch Stage</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
